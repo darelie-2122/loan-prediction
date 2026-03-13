@@ -50,9 +50,10 @@ input_encoded = encoder.transform(input_data)
 
 # Prediction
 if st.button("Predict Loan Status"):
-    prediction = model.predict(input_encoded)
 
-    if prediction[0] == 1:
+    prediction = model.predict(input_df)[0]
+
+    if prediction >= 0.5:
         st.success("Loan Approved ✅")
     else:
         st.error("Loan Not Approved ❌")
