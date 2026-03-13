@@ -14,7 +14,7 @@ import joblib
 # -----------------------------
 # Load model and encoders
 # -----------------------------
-model = joblib.load("Loan_prediction_model.pkl")
+model = joblib.load("Loan_prediction_xgb_model (1).pkl")
 encoder = joblib.load("label_encoder_Loan_prediction.pkl")
 
 st.title("Loan Status Prediction App")
