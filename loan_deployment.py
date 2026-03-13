@@ -18,7 +18,7 @@ import joblib
 model = joblib.load("Loan_prediction_xgb_model (1).pkl")
 encoder = joblib.load("label_encoder_Loan_prediction.pkl")
 
-st.title("Loan Amount Prediction System")
+st.title("Loan Prediction System")
 
 st.write("Enter Applicant Details")
 
@@ -42,7 +42,6 @@ property_area = st.selectbox("Property Area", encoder["Property_Area"].classes_)
 
 loan_status = st.selectbox("Loan Status", encoder["Loan_Status"].classes_)
 
-# Loan Amount input (needed for LoanAmount_log)
 loan_amount = st.number_input("Loan Amount", min_value=0.0)
 
 # -----------------------------
@@ -54,7 +53,7 @@ loan_amount_log = np.log(loan_amount + 1)
 # Prediction
 # -----------------------------
 
-if st.button("Predict Loan Amount"):
+if st.button("Predict Loan Details"):
 
     input_df = pd.DataFrame({
     "Gender":[gender],
@@ -76,14 +75,21 @@ if st.button("Predict Loan Amount"):
         if col in input_df.columns:
             input_df[col] = encoder[col].transform(input_df[col])
 
-    # Convert to float
     input_df = input_df.astype(float)
 
-    # Model Prediction
+    # Predict Loan Amount
     prediction = model.predict(input_df)[0]
 
     st.success(f"Predicted Loan Amount: {prediction:.2f}")
 
+    # -----------------------------
+    # Loan Approval Logic
+    # -----------------------------
+
+    if credit_history == 1 and applicant_income > 2500:
+        st.success("Loan Likely Approved ✅")
+    else:
+        st.error("Loan Likely Not Approved ❌")
 
 
 
