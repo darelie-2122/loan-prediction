@@ -9,53 +9,87 @@ Original file is located at
 
 import streamlit as st
 import pandas as pd
-import numpy as np
 import joblib
 
-# Load model and encoder
-model = joblib.load("Loan_prediction_xgb_model (1).pkl")
+# -----------------------------
+# Load model and encoders
+# -----------------------------
+model = joblib.load("Loan_prediction_model.pkl")
 encoder = joblib.load("label_encoder_Loan_prediction.pkl")
 
-st.title("🏦 Loan Prediction App")
+st.title("Loan Status Prediction App")
 
-st.write("Enter Applicant Details")
+# -----------------------------
+# User Inputs
+# -----------------------------
 
-# Inputs
-gender = st.selectbox("Gender", ["Male", "Female"])
-married = st.selectbox("Married", ["Yes", "No"])
-education = st.selectbox("Education", ["Graduate", "Not Graduate"])
-self_employed = st.selectbox("Self Employed", ["Yes", "No"])
-property_area = st.selectbox("Property Area", ["Urban", "Semiurban", "Rural"])
+gender = st.selectbox("Gender", encoder["Gender"].classes_)
+married = st.selectbox("Married", encoder["Married"].classes_)
+dependents = st.selectbox("Dependents", encoder["Dependents"].classes_)
+education = st.selectbox("Education", encoder["Education"].classes_)
+self_employed = st.selectbox("Self Employed", encoder["Self_Employed"].classes_)
 
 applicant_income = st.number_input("Applicant Income", min_value=0)
 coapplicant_income = st.number_input("Coapplicant Income", min_value=0)
-loan_amount_term = st.number_input("Loan Amount Term", min_value=0)
-credit_history = st.selectbox("Credit History", [0, 1])
+loan_amount = st.number_input("Loan Amount", min_value=0)
+loan_term = st.number_input("Loan Amount Term", min_value=0)
 
-# Prediction button
+credit_history = st.selectbox("Credit History", [0,1])
+property_area = st.selectbox("Property Area", encoder["Property_Area"].classes_)
+
+# -----------------------------
+# Create dataframe
+# -----------------------------
+
+input_df = pd.DataFrame({
+    "Gender":[gender],
+    "Married":[married],
+    "Dependents":[dependents],
+    "Education":[education],
+    "Self_Employed":[self_employed],
+    "ApplicantIncome":[applicant_income],
+    "CoapplicantIncome":[coapplicant_income],
+    "LoanAmount":[loan_amount],
+    "Loan_Amount_Term":[loan_term],
+    "Credit_History":[credit_history],
+    "Property_Area":[property_area]
+})
+
+# -----------------------------
+# Prediction
+# -----------------------------
+
 if st.button("Predict Loan Status"):
 
-    input_data = pd.DataFrame({
-        "Gender":[gender],
-        "Married":[married],
-        "Education":[education],
-        "Self_Employed":[self_employed],
-        "Property_Area":[property_area],
-        "ApplicantIncome":[applicant_income],
-        "CoapplicantIncome":[coapplicant_income],
-        "Loan_Amount_Term":[loan_amount_term],
-        "Credit_History":[credit_history]
-    })
-
-    # Encode only categorical columns
+    # Encode categorical columns
     for col in encoder:
-        if col in input_data.columns:
-            input_data[col] = encoder[col].transform(input_data[col])
+        if col in input_df.columns:
+            input_df[col] = encoder[col].transform(input_df[col])
 
-    prediction = model.predict(input_data)[0]
+    # Correct feature order (important)
+    model_features = [
+        "Gender",
+        "Married",
+        "Dependents",
+        "Education",
+        "Self_Employed",
+        "ApplicantIncome",
+        "CoapplicantIncome",
+        "LoanAmount",
+        "Loan_Amount_Term",
+        "Credit_History",
+        "Property_Area"
+    ]
 
-    if prediction == 1:
+    input_df = input_df[model_features]
+
+    # Model prediction
+    prediction = model.predict(input_df)[0]
+
+    st.write("Model Output Value:", prediction)
+
+    # Convert regression output to class
+    if prediction >= 0.5:
         st.success("Loan Approved ✅")
     else:
         st.error("Loan Not Approved ❌")
-
