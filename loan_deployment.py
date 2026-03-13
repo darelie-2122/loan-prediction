@@ -79,7 +79,7 @@ if st.button("Predict Loan Status"):
     input_df = input_df.astype(float)
 
     # Prediction
-    prediction = model.predict(input_df)[0]
+    prediction = model.predict(input_df.values)[0]
 
     st.write("Model Output:", prediction)
 
@@ -87,5 +87,6 @@ if st.button("Predict Loan Status"):
         st.success("Loan Approved ✅")
     else:
         st.error("Loan Not Approved ❌")
+
 
 
