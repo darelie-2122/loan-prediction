@@ -9,15 +9,18 @@ Original file is located at
 
 import streamlit as st
 import pandas as pd
+import numpy as np
 import joblib
 
 # -----------------------------
-# Load model and encoders
+# Load model and encoder
 # -----------------------------
-model = joblib.load("Loan_prediction_xgb_model (1).pkl")
+model = joblib.load("Loan_prediction_xgb_model.pkl")
 encoder = joblib.load("label_encoder_Loan_prediction.pkl")
 
-st.title("Loan Status Prediction App")
+st.title("Loan Amount Prediction System")
+
+st.write("Enter Applicant Details")
 
 # -----------------------------
 # User Inputs
@@ -31,17 +34,29 @@ self_employed = st.selectbox("Self Employed", encoder["Self_Employed"].classes_)
 
 applicant_income = st.number_input("Applicant Income", min_value=0)
 coapplicant_income = st.number_input("Coapplicant Income", min_value=0)
-loan_amount = st.number_input("Loan Amount", min_value=0)
-loan_term = st.number_input("Loan Amount Term", min_value=0)
 
+loan_term = st.number_input("Loan Amount Term", min_value=0)
 credit_history = st.selectbox("Credit History", [0,1])
+
 property_area = st.selectbox("Property Area", encoder["Property_Area"].classes_)
 
+loan_status = st.selectbox("Loan Status", encoder["Loan_Status"].classes_)
+
+# Loan Amount input (needed for LoanAmount_log)
+loan_amount = st.number_input("Loan Amount", min_value=0.0)
+
 # -----------------------------
-# Create dataframe
+# Create LoanAmount_log
+# -----------------------------
+loan_amount_log = np.log(loan_amount + 1)
+
+# -----------------------------
+# Prediction
 # -----------------------------
 
-input_df = pd.DataFrame({
+if st.button("Predict Loan Amount"):
+
+    input_df = pd.DataFrame({
     "Gender":[gender],
     "Married":[married],
     "Dependents":[dependents],
@@ -49,29 +64,25 @@ input_df = pd.DataFrame({
     "Self_Employed":[self_employed],
     "ApplicantIncome":[applicant_income],
     "CoapplicantIncome":[coapplicant_income],
-    "LoanAmount":[loan_amount],
     "Loan_Amount_Term":[loan_term],
     "Credit_History":[credit_history],
-    "Property_Area":[property_area]
-})
+    "Property_Area":[property_area],
+    "Loan_Status":[loan_status],
+    "LoanAmount_log":[loan_amount_log]
+    })
 
-# -----------------------------
-# Prediction
-# -----------------------------
-if st.button("Predict Loan Status"):
-
+    # Encode categorical columns
     for col in encoder:
         if col in input_df.columns:
             input_df[col] = encoder[col].transform(input_df[col])
 
+    # Convert to float
     input_df = input_df.astype(float)
 
-    prediction = model.predict(input_df.values)[0]
+    # Model Prediction
+    prediction = model.predict(input_df)[0]
 
-    if prediction == 1:
-        st.success("Loan Approved ✅")
-    else:
-        st.error("Loan Not Approved ❌")
+    st.success(f"Predicted Loan Amount: {prediction:.2f}")
 
 
 
