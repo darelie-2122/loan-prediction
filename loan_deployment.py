@@ -61,35 +61,24 @@ input_df = pd.DataFrame({
 
 if st.button("Predict Loan Status"):
 
-    # Encode categorical columns
     for col in encoder:
         if col in input_df.columns:
             input_df[col] = encoder[col].transform(input_df[col])
 
-    # Correct feature order (important)
     model_features = [
-        "Gender",
-        "Married",
-        "Dependents",
-        "Education",
-        "Self_Employed",
-        "ApplicantIncome",
-        "CoapplicantIncome",
-        "LoanAmount",
-        "Loan_Amount_Term",
-        "Credit_History",
-        "Property_Area"
+        "Gender","Married","Dependents","Education","Self_Employed",
+        "ApplicantIncome","CoapplicantIncome","LoanAmount",
+        "Loan_Amount_Term","Credit_History","Property_Area"
     ]
 
     input_df = input_df[model_features]
 
-    # Model prediction
-    prediction = model.predict(input_df)[0]
+    prediction = model.predict(input_df, validate_features=False)[0]
 
-    st.write("Model Output Value:", prediction)
+    st.write("Model Output:", prediction)
 
-    # Convert regression output to class
     if prediction >= 0.5:
         st.success("Loan Approved ✅")
     else:
         st.error("Loan Not Approved ❌")
+
