@@ -35,7 +35,6 @@ credit_history = st.selectbox("Credit History", [0, 1])
 # Prediction button
 if st.button("Predict Loan Status"):
 
-    # Create dataframe
     input_data = pd.DataFrame({
         "Gender":[gender],
         "Married":[married],
@@ -48,11 +47,11 @@ if st.button("Predict Loan Status"):
         "Credit_History":[credit_history]
     })
 
-    # Encode categorical columns
+    # Encode only categorical columns
     for col in encoder:
-        input_data[col] = encoder[col].transform(input_data[col])
+        if col in input_data.columns:
+            input_data[col] = encoder[col].transform(input_data[col])
 
-    # Prediction
     prediction = model.predict(input_data)[0]
 
     if prediction == 1:
