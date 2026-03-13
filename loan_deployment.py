@@ -64,17 +64,15 @@ if st.button("Predict Loan Status"):
         if col in input_df.columns:
             input_df[col] = encoder[col].transform(input_df[col])
 
-    model_features = model.get_booster().feature_names
-    input_df = input_df[model_features]
-
     input_df = input_df.astype(float)
 
-    prediction = model.predict(input_df)[0]
+    prediction = model.predict(input_df.values)[0]
 
-    if prediction >= 0.5:
+    if prediction == 1:
         st.success("Loan Approved ✅")
     else:
         st.error("Loan Not Approved ❌")
+
 
 
 
