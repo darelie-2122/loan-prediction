@@ -16,7 +16,7 @@ import joblib
 model = joblib.load("Loan_prediction_xgb_model (1).pkl")
 encoder = joblib.load("label_encoder_Loan_prediction.pkl")
 
-st.title("Loan Prediction App")
+st.title("🏦 Loan Prediction App")
 
 st.write("Enter Applicant Details")
 
@@ -27,33 +27,36 @@ education = st.selectbox("Education", ["Graduate", "Not Graduate"])
 self_employed = st.selectbox("Self Employed", ["Yes", "No"])
 property_area = st.selectbox("Property Area", ["Urban", "Semiurban", "Rural"])
 
-applicant_income = st.number_input("Applicant Income")
-coapplicant_income = st.number_input("Coapplicant Income")
-loan_amount_term = st.number_input("Loan Amount Term")
-credit_history = st.selectbox("Credit History", [0,1])
+applicant_income = st.number_input("Applicant Income", min_value=0)
+coapplicant_income = st.number_input("Coapplicant Income", min_value=0)
+loan_amount_term = st.number_input("Loan Amount Term", min_value=0)
+credit_history = st.selectbox("Credit History", [0, 1])
 
-# Create dataframe
-input_data = pd.DataFrame({
-    "Gender":[gender],
-    "Married":[married],
-    "Education":[education],
-    "Self_Employed":[self_employed],
-    "Property_Area":[property_area],
-    "ApplicantIncome":[applicant_income],
-    "CoapplicantIncome":[coapplicant_income],
-    "Loan_Amount_Term":[loan_amount_term],
-    "Credit_History":[credit_history]
-})
-
-# Encode categorical variables
-input_encoded = encoder.transform(input_data)
-
-# Prediction
+# Prediction button
 if st.button("Predict Loan Status"):
 
-    prediction = model.predict(input_df)[0]
+    # Create dataframe
+    input_data = pd.DataFrame({
+        "Gender":[gender],
+        "Married":[married],
+        "Education":[education],
+        "Self_Employed":[self_employed],
+        "Property_Area":[property_area],
+        "ApplicantIncome":[applicant_income],
+        "CoapplicantIncome":[coapplicant_income],
+        "Loan_Amount_Term":[loan_amount_term],
+        "Credit_History":[credit_history]
+    })
 
-    if prediction >= 0.5:
+    # Encode categorical columns
+    for col in encoder:
+        input_data[col] = encoder[col].transform(input_data[col])
+
+    # Prediction
+    prediction = model.predict(input_data)[0]
+
+    if prediction == 1:
         st.success("Loan Approved ✅")
     else:
         st.error("Loan Not Approved ❌")
+
