@@ -58,35 +58,24 @@ input_df = pd.DataFrame({
 # -----------------------------
 # Prediction
 # -----------------------------
-
 if st.button("Predict Loan Status"):
 
-    # Encode categorical columns
     for col in encoder:
         if col in input_df.columns:
             input_df[col] = encoder[col].transform(input_df[col])
 
-    # Correct feature order
-    model_features = [
-        "Gender","Married","Dependents","Education","Self_Employed",
-        "ApplicantIncome","CoapplicantIncome","LoanAmount",
-        "Loan_Amount_Term","Credit_History","Property_Area"
-    ]
-
+    model_features = model.get_booster().feature_names
     input_df = input_df[model_features]
 
-    # Convert to numeric
     input_df = input_df.astype(float)
 
-    # Prediction
-    prediction = model.predict(input_df.values)[0]
-
-    st.write("Model Output:", prediction)
+    prediction = model.predict(input_df)[0]
 
     if prediction >= 0.5:
         st.success("Loan Approved ✅")
     else:
         st.error("Loan Not Approved ❌")
+
 
 
 
