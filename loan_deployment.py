@@ -9,14 +9,13 @@ Original file is located at
 
 import streamlit as st
 import pandas as pd
-import numpy as np
 import joblib
 
-# Load model and encoder
+# Load model and encoders
 model = joblib.load("Loan_prediction_xgb_model (1).pkl")
 encoder = joblib.load("label_encoder_Loan_prediction.pkl")
 
-st.title("Loan Prediction System")
+st.title("Loan Amount Prediction System")
 
 st.write("Enter Applicant Details")
 
@@ -33,23 +32,16 @@ self_employed = st.selectbox("Self Employed", encoder["Self_Employed"].classes_)
 applicant_income = st.number_input("Applicant Income", min_value=0)
 coapplicant_income = st.number_input("Coapplicant Income", min_value=0)
 
-loan_amount = st.number_input("Loan Amount", min_value=0)
-
 loan_term = st.number_input("Loan Amount Term", min_value=0)
 
 credit_history = st.selectbox("Credit History", [0,1])
 
 property_area = st.selectbox("Property Area", encoder["Property_Area"].classes_)
 
-loan_status = st.selectbox("Loan Status", encoder["Loan_Status"].classes_)
-
 # -----------------------------
-# Log Transformation
+# Prediction Button
 # -----------------------------
 
-# -----------------------------
-# Prediction
-# -----------------------------
 if st.button("Predict Loan Amount"):
 
     input_df = pd.DataFrame({
@@ -62,31 +54,27 @@ if st.button("Predict Loan Amount"):
         "CoapplicantIncome":[coapplicant_income],
         "Loan_Amount_Term":[loan_term],
         "Credit_History":[credit_history],
-        "Property_Area":[property_area],
-        "Loan_Status":[loan_status],
+        "Property_Area":[property_area]
     })
 
-    # Encode categorical columns
+    # Encode categorical variables
     for col in encoder:
         if col in input_df.columns:
             input_df[col] = encoder[col].transform(input_df[col])
 
     input_df = input_df.astype(float)
 
-    # Correct column order
-    input_df = input_df[model.get_booster().feature_names]
+    # Ensure correct column order
+    model_features = model.get_booster().feature_names
 
+    for col in model_features:
+        if col not in input_df.columns:
+            input_df[col] = 0
+
+    input_df = input_df[model_features]
+
+    # Prediction
     prediction = model.predict(input_df)[0]
 
-    # Show predicted loan amount
-    st.success(f"Predicted Loan Amount: {prediction:.2f}")
-
-    # -----------------------------
-    # Loan Approval Logic
-    # -----------------------------
-
-    if credit_history == 1 and applicant_income > 2500:
-        st.success("Loan Likely Approved ✅")
-    else:
-        st.error("Loan Likely Not Approved ❌")
+    st.success(f"Predicted Loan Amount: ₹ {prediction:,.2f}")
 
