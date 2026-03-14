@@ -52,7 +52,6 @@ loan_amount_log = np.log(loan_amount + 1)
 # -----------------------------
 # Prediction
 # -----------------------------
-
 if st.button("Predict Loan Amount"):
 
     input_df = pd.DataFrame({
@@ -77,12 +76,20 @@ if st.button("Predict Loan Amount"):
 
     input_df = input_df.astype(float)
 
-    # Ensure correct column order
+    # Correct column order
     input_df = input_df[model.get_booster().feature_names]
 
     prediction = model.predict(input_df)[0]
 
+    # Show predicted loan amount
     st.success(f"Predicted Loan Amount: {prediction:.2f}")
 
+    # -----------------------------
+    # Loan Approval Logic
+    # -----------------------------
 
+    if credit_history == 1 and applicant_income > 2500:
+        st.success("Loan Likely Approved ✅")
+    else:
+        st.error("Loan Likely Not Approved ❌")
 
