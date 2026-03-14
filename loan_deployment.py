@@ -42,8 +42,6 @@ property_area = st.selectbox("Property Area", encoder["Property_Area"].classes_)
 
 loan_status = st.selectbox("Loan Status", encoder["Loan_Status"].classes_)
 
-loan_amount = st.number_input("Loan Amount", min_value=0.0)
-
 # -----------------------------
 # Create LoanAmount_log
 # -----------------------------
