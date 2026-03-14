@@ -47,8 +47,6 @@ loan_status = st.selectbox("Loan Status", encoder["Loan_Status"].classes_)
 # Log Transformation
 # -----------------------------
 
-loan_amount_log = np.log(loan_amount + 1)
-
 # -----------------------------
 # Prediction
 # -----------------------------
@@ -66,7 +64,6 @@ if st.button("Predict Loan Amount"):
         "Credit_History":[credit_history],
         "Property_Area":[property_area],
         "Loan_Status":[loan_status],
-        "LoanAmount_log":[loan_amount_log]
     })
 
     # Encode categorical columns
